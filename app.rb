@@ -26,21 +26,20 @@ post('/login') do
 
   if BCrypt::Password.new(pwdigest) == password 
     session[:id] = id
-    redirect('/index')
+    redirect('/profile')
   else
     "FEL LÖSEN!"
   end
 
 end
 
-get('/index') do 
+get('/profile') do 
 
     id = session[:id].to_i
-    db = SQLite3::Database.new('db/todo2021.db')
+    db = SQLite3::Database.new('db/db.db')
     db.results_as_hash = true 
-    result = db.execute("SELECT * FROM rating WHERE user_id = ?",id)
-    p "Alla rating från result #{result}"
-    slim(:index, locals:{rating:result})
+    result = db.execute("SELECT media.title, media.author, media.series, users.username, rating.rating FROM ((rating INNER JOIN users ON rating.user_id = users.id) INNER JOIN media ON rating.media_id = media.id) WHERE user_id = ?", [id])
+    slim(:profile, locals:{rating:result})
 end 
 
 post('/users/new') do 
@@ -52,7 +51,7 @@ post('/users/new') do
       password_digest = BCrypt::Password.create(password)
       db = SQLite3::Database.new('db/db.db')
       db.execute('INSERT INTO users (username,pwdigest) VALUES (?,?)',[username,password_digest])
-      redirect('/index')
+      redirect('/profile')
     else
       "Lösenorden matchade inte"
     end

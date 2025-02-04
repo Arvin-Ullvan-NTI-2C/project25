@@ -1,0 +1,16 @@
+h2 Alla dina ratings #{session[:id]}!
+
+- rating.each do |rating|
+   p = (rating["title"] + ", " + rating["series"] +", " + rating["author"] + ", " + rating["rating"].to_s  + "/10, " + rating["username"])
+
+end
+
+form action="/albums/new" method="post"
+  input type="text" name="title" placeholder="Titel på bok" 
+  input type="text" name="author" placeholder="namnet på författare" 
+  input type="text" name="series" placeholder="namnet på serien" 
+  input type="text" name="rating" placeholder="din rating /10" 
+  input type="submit" value="Lägg upp din rating" 
+end
+
+
