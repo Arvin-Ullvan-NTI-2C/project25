@@ -23,6 +23,8 @@ post('/login') do
   result = db.execute("SELECT * FROM users WHERE username = ?", [username]).first
   pwdigest = result["pwdigest"]
   id = result["id"]
+  session[:username] = username
+
 
   if BCrypt::Password.new(pwdigest) == password 
     session[:id] = id
@@ -38,7 +40,7 @@ get('/profile') do
     id = session[:id].to_i
     db = SQLite3::Database.new('db/db.db')
     db.results_as_hash = true 
-    result = db.execute("SELECT media.title, media.author, media.series, users.username, rating.rating FROM ((rating INNER JOIN users ON rating.user_id = users.id) INNER JOIN media ON rating.media_id = media.id) WHERE user_id = ?", [id])
+    result = db.execute("SELECT media.title, media.author, media.series, users.username, rating.rating, rating.comment FROM ((rating INNER JOIN users ON rating.user_id = users.id) INNER JOIN media ON rating.media_id = media.id) WHERE user_id = ?", [id])
     slim(:profile, locals:{rating:result})
 end 
 
@@ -46,13 +48,31 @@ post('/users/new') do
     username = params[:username]
     password = params[:password]
     password_confirm = params[:password_confirm]
-  
+    session[:username] = username
+
     if (password == password_confirm)
       password_digest = BCrypt::Password.create(password)
       db = SQLite3::Database.new('db/db.db')
+      db.results_as_hash = true 
       db.execute('INSERT INTO users (username,pwdigest) VALUES (?,?)',[username,password_digest])
+      result = db.execute("SELECT * FROM users WHERE username = ?", [username]).first
+      id = result["id"]
+      session[:id] = id
       redirect('/profile')
     else
       "Lösenorden matchade inte"
     end
   end
+
+post('/rating/new') do
+  user_id = session[:id]
+  rating = params[:rating].to_i
+  title = params[:title]
+  author = params[:author]
+  series = params[:series]
+  comment = params[:comment]
+  db = SQLite3::Database.new('db/db.db')
+  db.execute('INSERT INTO rating (user_id,rating,comment) VALUES (?,?,?)', [session[:id], rating,comment])
+  db.execute('INSERT INTO media (author,title, series) VALUES (?,?,?)', [author,title,series])
+  redirect('/profile')
+end
