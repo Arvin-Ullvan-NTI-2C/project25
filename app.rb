@@ -28,21 +28,36 @@ post('/login') do
 
   if BCrypt::Password.new(pwdigest) == password 
     session[:id] = id
-    redirect('/profile')
+    redirect('/priv_profile')
   else
     "FEL LÖSEN!"
   end
 
 end
 
-get('/profile') do 
+get('/priv_profile') do 
 
     id = session[:id].to_i
     db = SQLite3::Database.new('db/db.db')
     db.results_as_hash = true 
     result = db.execute("SELECT media.title, media.author, media.series, users.username, rating.rating, rating.comment FROM ((rating INNER JOIN users ON rating.user_id = users.id) INNER JOIN media ON rating.media_id = media.id) WHERE user_id = ?", [id])
-    slim(:profile, locals:{rating:result})
+    slim(:priv_profile, locals:{rating:result})
 end 
+
+get('/profile/:id') do 
+  user_id = params[:id].to_i 
+  db = SQLite3::Database.new('db/db.db')
+  db.results_as_hash = true 
+  result = db.execute("SELECT media.title, media.author, media.series, users.username, rating.rating, rating.comment FROM ((rating INNER JOIN users ON rating.user_id = users.id) INNER JOIN media ON rating.media_id = media.id) WHERE user_id = ?", [user_id])
+  slim(:profile, locals:{rating:result})
+end
+
+get('/profiles') do
+  db = SQLite3::Database.new('db/db.db')
+  db.results_as_hash = true 
+  users = db.execute("SELECT * FROM users")
+  slim(:profiles, locals:{users:users})
+end
 
 post('/users/new') do 
     username = params[:username]
@@ -58,7 +73,7 @@ post('/users/new') do
       result = db.execute("SELECT * FROM users WHERE username = ?", [username]).first
       id = result["id"]
       session[:id] = id
-      redirect('/profile')
+      redirect('/priv_profile')
     else
       "Lösenorden matchade inte"
     end
@@ -73,6 +88,7 @@ post('/rating/new') do
   comment = params[:comment]
   db = SQLite3::Database.new('db/db.db')
   db.execute('INSERT INTO rating (user_id,rating,comment) VALUES (?,?,?)', [session[:id], rating,comment])
-  db.execute('INSERT INTO media (author,title, series) VALUES (?,?,?)', [author,title,series])
-  redirect('/profile')
+  db.execute('INSERT INTO media (author, title, series) VALUES (?,?,?)', [author,title,series])
+  redirect('/priv_profile')
 end
+
