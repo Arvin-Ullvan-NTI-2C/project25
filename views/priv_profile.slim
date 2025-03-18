@@ -1,8 +1,11 @@
 
 - rating.each do |rating|
-  p = (rating["title"] + ", " + rating["series"] +", " + rating["author"] + ", " + rating["rating"].to_s  + "/10, " + rating["comment"] + ", " + rating["username"])
+  p = (rating["title"] + ", " + rating["series"] + ", " + rating["author"] + ", " + rating["rating"].to_s + "/10, " + rating["comment"] + ", " + rating["username"])
 
-end
+  form action="/rating/#{rating['rating_id']}/delete" method="post"
+    input type="submit" value="Ta bort"
+
+
 
 form action="/rating/new" method="post"
   input type="text" name="title" placeholder="Titel på bok" 
