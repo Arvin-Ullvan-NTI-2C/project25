@@ -1,8 +1,8 @@
-
+p = rating
 - rating.each do |rating|
   p = (rating["title"] + ", " + rating["series"] + ", " + rating["author"] + ", " + rating["rating"].to_s + "/10, " + rating["comment"] + ", " + rating["username"])
 
-  form action="/rating/#{rating['rating_id']}/delete" method="post"
+  form action="rating/#{rating['rating_id']}/delete" method="post"
     input type="submit" value="Ta bort"
 
 

@@ -76,15 +76,16 @@ post('/users/new') do
     else
       "Lösenorden matchade inte"
     end
-  end
+end
 
-  post('/rating/new') do
+post('/rating/new') do
     user_id = session[:id]
     rating = params[:rating].to_i
     title = params[:title]
     author = params[:author]
     series = params[:series]
     comment = params[:comment]
+    rating_id = params[:rating_id].to_i  
   
     db = SQLite3::Database.new('db/db.db')
     db.results_as_hash = true 
@@ -102,15 +103,14 @@ post('/users/new') do
   
     # Insert rating using the correct media_id
     db.execute('INSERT INTO rating (user_id, media_id, rating, comment) VALUES (?,?,?,?)', [user_id, media_id, rating, comment])
-  
+    
     redirect('/priv_profile')
-  end
+end
   
 
 post('/rating/:rating_id/delete') do
     rating_id = params[:rating_id].to_i  
     db = SQLite3::Database.new('db/db.db')
-    db.results_as_hash = true 
     db.execute("DELETE FROM rating WHERE rating_id = ?", [rating_id])
     redirect('/priv_profile')
     
