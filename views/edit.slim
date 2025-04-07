@@ -1,0 +1,9 @@
+
+form action="/rating/#{rating['rating_id']}/update" method="post"
+    input type="text" name="title" value="#{rating['title']}"
+    input type="text" name="series" value="#{rating['series']}"
+    input type="text" name="author" value="#{rating['author']}"
+    input type="text" name="rating" value="#{rating['rating']}"
+    input type="text" name="comment" value="#{rating['comment']}"
+    input type="hidden" name="rating_id" value="#{rating['rating_id']}"
+    input type="submit" value="Edit"
