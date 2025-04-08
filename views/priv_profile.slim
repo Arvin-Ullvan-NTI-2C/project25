@@ -1,7 +1,12 @@
+nav
+      
+      a href="/priv_profile" Your profile
+      a href="/profiles" Users
+      a href="/logout" Logout
+
 - rating.each do |rating|
   p = (rating["title"] + ", " + rating["series"] + ", " + rating["author"] + ", " + rating["rating"].to_s + "/10, " + rating["comment"] + ", " + rating["username"])
-
-
+  
   a href="rating/#{rating['rating_id']}/edit" Uppdatera 
   form action="rating/#{rating['rating_id']}/delete" method="post"
     input type="submit" value="Ta bort"

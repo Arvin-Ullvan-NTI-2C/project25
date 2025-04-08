@@ -1,3 +1,8 @@
+nav
+      a href="/priv_profile" Your profile
+      a href="/profiles" Users
+      a href="/logout" Logout
+
 - users.each do |users|
     li 
         a href="/profile/#{users['id']}" = users["username"]
