@@ -1,5 +1,7 @@
 h1 Welcome to Ratings!
 
+-if locals[:error]
+    p.error = error
 form action="users/new" method="post" 
     input type="text" name="username" placeholder="Enter Username"
     input type="password" name="password" placeholder="Enter Password"

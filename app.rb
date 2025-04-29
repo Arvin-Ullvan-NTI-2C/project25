@@ -48,19 +48,29 @@ end
 #
 post('/login') do
   username = params[:username]
+  if username.length == 0
+    slim :login, locals: {error: 'MÅSTE INNEHÅLLA ANVÄNDARNAMN'}
+  end
   password = params[:password] 
+  if password.length == 0
+    slim :login, locals: {error: 'MÅSTE INNEHÅLLA LÖSENORD'}
+  end
   db = SQLite3::Database.new('db/db.db')
   db.results_as_hash = true 
   result = db.execute("SELECT * FROM users WHERE username = ?", [username]).first
-  pwdigest = result["pwdigest"]
-  id = result["id"]
-  session[:username] = username
-
-  if BCrypt::Password.new(pwdigest) == password 
-    session[:id] = id
-    redirect('/priv_profile')
+  if result == nil
+    slim :login, locals: {error: 'ANVÄNDARE EJ FUNNEN'}
   else
-    "FEL LÖSEN!"
+    pwdigest = result["pwdigest"]
+    id = result["id"]
+    session[:username] = username
+
+    if BCrypt::Password.new(pwdigest) == password 
+      session[:id] = id
+      redirect('/priv_profile')
+    else
+      slim :login, locals: {error: 'FEL LÖSEN' }
+    end
   end
 end
 
@@ -104,19 +114,22 @@ post('/users/new') do
   username = params[:username]
   password = params[:password]
   password_confirm = params[:password_confirm]
-  session[:username] = username
-
-  if (password == password_confirm)
-    password_digest = BCrypt::Password.create(password)
-    db = SQLite3::Database.new('db/db.db')
-    db.results_as_hash = true 
-    db.execute('INSERT INTO users (username,pwdigest) VALUES (?,?)',[username,password_digest])
-    result = db.execute("SELECT * FROM users WHERE username = ?", [username]).first
-    id = result["id"]
-    session[:id] = id
-    redirect('/priv_profile')
+  if username.length == 0 || password.length == 0 || password_confirm.length == 0 
+    slim :register, locals: {error: 'INGA TOMMA FÄLT'}
   else
-    "Lösenorden matchade inte"
+    session[:username] = username
+    if (password == password_confirm)
+      password_digest = BCrypt::Password.create(password)
+      db = SQLite3::Database.new('db/db.db')
+      db.results_as_hash = true 
+      db.execute('INSERT INTO users (username,pwdigest) VALUES (?,?)',[username,password_digest])
+      result = db.execute("SELECT * FROM users WHERE username = ?", [username]).first
+      id = result["id"]
+      session[:id] = id
+      redirect('/priv_profile')
+    else
+      slim :register, locals: {error: 'LÖSENORDEN MATCHADE INTE'}
+    end
   end
 end
 
